@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace QuickMenu
@@ -17,8 +18,25 @@ namespace QuickMenu
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
+            string text = "#" + _index + "/" + listBoxProducts.Text;
+
+            string file = fileOperations.ReadFile();
+            string[] menus = file.Split('#');
+            foreach (var menu in menus)
+            {
+                if (!string.IsNullOrEmpty(menu))
+                {
+                    string[] properties = menu.Split('/');
+
+                    if (listBoxProducts.Text.Contains(properties[1]))
+                    {
+                        fileOperations.FindAndRemoveLine("#" + menu);
+                    }
+                }
+            }
+
             fileOperations.CreateFile();
-            fileOperations.WriteToFile("#" + _index + "/" + listBoxProducts.Text, true);
+            fileOperations.WriteToFile(text, true);
 
             this.Close();
         }
