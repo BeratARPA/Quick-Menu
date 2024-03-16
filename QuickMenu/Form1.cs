@@ -127,12 +127,13 @@ namespace QuickMenu
                 {
                     var product = products.Where(x => x.Index == productIndex).FirstOrDefault();
 
-                    ProductUserControl productUserControl = new ProductUserControl(product == null ? null : product, productIndex)
+                    ProductUserControl productUserControl = new ProductUserControl(product == null ? null : product, productIndex, true)
                     {
                         Dock = DockStyle.Fill
                     };
 
                     productUserControl.ProductClick += ProductUserControl_Click;
+                    productUserControl.ProductRightClick += ProductUserControl_RightClick;
                     productUserControl.SelectProductClick += ProductUserControl_SelectProductClick;
 
                     tableLayoutPanelProducts.Controls.Add(productUserControl);
@@ -142,6 +143,28 @@ namespace QuickMenu
             }
 
             tableLayoutPanelProducts.ResumeLayout();
+        }
+
+        private void ProductUserControl_RightClick(object sender, EventArgs e)
+        {
+            ProductUserControl productUserControl = (ProductUserControl)sender;
+
+            string file = fileOperations.ReadFile();
+            string[] menus = file.Split('#');
+            foreach (var menu in menus)
+            {
+                if (!string.IsNullOrEmpty(menu))
+                {
+                    string[] properties = menu.Split('/');
+
+                    if (properties[1] == productUserControl._product.Name)
+                    {
+                        fileOperations.FindAndRemoveLine("#" + menu);
+                    }
+                }
+            }
+
+            CreateQuickMenu(GetQuickMenu());
         }
 
         private void ProductUserControl_SelectProductClick(object sender, EventArgs e)

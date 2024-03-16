@@ -7,23 +7,27 @@ namespace QuickMenu
     public partial class ProductUserControl : UserControl
     {
         public int _index;
+        public bool _quickMenu;
         public Product _product;
+        private ContextMenuStrip _contextMenuStrip;
 
         public event EventHandler ProductClick;
         public event EventHandler SelectProductClick;
+        public event EventHandler ProductRightClick;
 
-        public ProductUserControl(Product product, int index)
+        public ProductUserControl(Product product, int index, bool quickMenu = false)
         {
             InitializeComponent();
 
             _product = product;
             _index = index;
+            _quickMenu = quickMenu;
 
             labelPrice.Dock = DockStyle.None;
             labelName.Dock = DockStyle.None;
 
             if (_product != null)
-            {               
+            {
                 Name = _product.Name;
                 Price = _product.Price;
                 Image = _product.ImageURL;
@@ -49,9 +53,21 @@ namespace QuickMenu
 
                 labelPrice.Dock = DockStyle.Top;
                 labelName.Dock = DockStyle.Bottom;
+
+                if (_quickMenu)
+                {
+                    _contextMenuStrip = new ContextMenuStrip();
+
+                    ToolStripMenuItem removeMenuItem = new ToolStripMenuItem
+                    {
+                        Text = "Delete"
+                    };
+                    removeMenuItem.Click += MenuItemRemove_Click;
+                    _contextMenuStrip.Items.Add(removeMenuItem);
+                }
             }
         }
-
+       
         private string _name;
         public string Name
         {
@@ -90,8 +106,23 @@ namespace QuickMenu
             }
         }
 
+        private void MenuItemRemove_Click(object sender, EventArgs e)
+        {
+            ProductRightClick?.Invoke(this, e);
+        }
+
         private void labelPrice_Click(object sender, EventArgs e)
         {
+            if (_quickMenu)
+            {
+                MouseEventArgs mouseEvent = e as MouseEventArgs;
+                if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right)
+                {
+                    _contextMenuStrip.Show(this, mouseEvent.Location);
+                    return;
+                }
+            }
+
             ProductClick?.Invoke(this, e);
         }
 
